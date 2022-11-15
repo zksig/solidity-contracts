@@ -1,0 +1,36 @@
+Arguments: 
+  /home/ryan/.nvm/versions/node/v18.10.0/bin/node /home/ryan/.nvm/versions/node/v18.10.0/bin/yarn add hardhat
+
+PATH: 
+  /home/ryan/.local/share/solana/install/active_release/bin:/home/ryan/.npm-global/bin:/home/ryan/.local/share/solana/install/active_release/bin:/home/ryan/.nvm/versions/node/v18.10.0/bin:/home/ryan/.npm-global/bin:/home/ryan/.local/bin:/home/ryan/.cargo/bin:/usr/local/bin:/usr/bin:/var/lib/snapd/snap/bin:/usr/local/sbin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/home/ryan/.gem/ruby/2.2.0/bin:/home/ryan/bin:/home/ryan/.rvm/bin/:/home/ryan/go/bin:/usr/local/node/bin:/home/ryan/.rvm/bin:/home/ryan/.gem/ruby/2.2.0/bin:/home/ryan/bin:/home/ryan/.rvm/bin/:/home/ryan/go/bin:/usr/local/node/bin:/home/ryan/.rvm/bin
+
+Yarn version: 
+  1.22.19
+
+Node version: 
+  18.10.0
+
+Platform: 
+  linux x64
+
+Trace: 
+  SyntaxError: /home/ryan/code/zksig/solidity-contract/package.json: Unexpected token y in JSON at position 97
+      at JSON.parse (<anonymous>)
+      at /home/ryan/.nvm/versions/node/v18.10.0/lib/node_modules/yarn/lib/cli.js:1629:59
+      at Generator.next (<anonymous>)
+      at step (/home/ryan/.nvm/versions/node/v18.10.0/lib/node_modules/yarn/lib/cli.js:310:30)
+      at /home/ryan/.nvm/versions/node/v18.10.0/lib/node_modules/yarn/lib/cli.js:321:13
+
+npm manifest: 
+  {
+    "name": "solidity-contract",
+    "version": "1.0.0",
+    "main": "index.js",
+    "license": "MIT"
+  }y
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
