@@ -4,7 +4,9 @@ import "hardhat-deploy";
 
 const config: HardhatUserConfig = {
   solidity: "0.8.17",
-  defaultNetwork: "wallaby",
+  mocha: {
+    timeout: 100000000,
+  },
   networks: {
     wallaby: {
       url: "https://wallaby.node.glif.io/rpc/v0",

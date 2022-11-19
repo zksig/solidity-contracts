@@ -105,14 +105,6 @@ contract DigitalSignature {
     return profile.totalAgreements++;
   }
 
-  function agreementToNFT(
-    uint256 index,
-    string memory nftImageCid
-  ) public returns (address) {
-    Agreement storage agreement = agreements[tx.origin][index];
-    return _deployNFTContract(agreement, nftImageCid);
-  }
-
   function _deployNFTContract(
     Agreement storage agreement,
     string memory nftImageCid
@@ -155,7 +147,7 @@ contract DigitalSignature {
           constraint.signer == tx.origin || constraint.signer == address(0),
           "Mismatched signer"
         );
-        constraint.allowedToUse++;
+        constraint.totalUsed++;
         if (constraint.allowedToUse == 1) {
           constraint.signer = tx.origin;
         }

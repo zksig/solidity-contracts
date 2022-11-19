@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.17;
 
+import { bytesToAddress } from "../utils/helpers.sol";
 import { specific_authenticate_message_params_parse, specific_deal_proposal_cbor_parse } from "../utils/CBORParse.sol";
 import "../utils/ERC721NoEvents.sol";
 
@@ -18,15 +19,15 @@ contract CommonNFTDealClient {
     bytes calldata client,
     bytes calldata provider,
     uint size
-  ) public {
+  ) public virtual {
     ERC721NoEvents nftContract = ERC721NoEvents(nftAddress);
 
     require(
-      nftContract.balanceOf(client) > 0,
+      nftContract.balanceOf(bytesToAddress(client)) > 0,
       "Client is missing required NFT"
     );
     require(
-      nftContract.balanceOf(provider) > 0,
+      nftContract.balanceOf(bytesToAddress(provider)) > 0,
       "Provider is missing required NFT"
     );
   }
