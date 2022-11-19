@@ -8,12 +8,6 @@ const request = util.promisify(require("request"));
 
 const DEPLOYER_PRIVATE_KEY = network.config.accounts[0];
 
-function hexToBytes(hex) {
-  for (var bytes = [], c = 0; c < hex.length; c += 2)
-    bytes.push(parseInt(hex.substr(c, 2), 16));
-  return new Uint8Array(bytes);
-}
-
 async function callRpc(method, params) {
   var options = {
     method: "POST",
@@ -39,7 +33,7 @@ module.exports = async ({ deployments, hardhatArguments }) => {
   const { deploy } = deployments;
 
   if (hardhatArguments.network === "sepolia") {
-    await deploy("ESignature", {
+    await deploy("DigitalSignature", {
       from: deployer.address,
       args: [],
       log: true,
@@ -47,23 +41,16 @@ module.exports = async ({ deployments, hardhatArguments }) => {
   } else {
     const priorityFee = await callRpc("eth_maxPriorityFeePerGas");
     const f4Address = fa.newDelegatedEthAddress(deployer.address).toString();
-    const nonce = await callRpc("Filecoin.MpoolGetNonce", [f4Address]);
 
     console.log("Wallet Ethereum Address:", deployer.address);
     console.log("Wallet f4Address: ", f4Address);
 
-    await deploy("ESignature", {
+    await deploy("DigitalSignature", {
       from: deployer.address,
       args: [],
-      // since it's difficult to estimate the gas before f4 address is launched, it's safer to manually set
-      // a large gasLimit. This should be addressed in the following releases.
-      gasLimit: 1000000000, // BlockGasLimit / 10
-      // since Ethereum's legacy transaction format is not supported on FVM, we need to specify
-      // maxPriorityFeePerGas to instruct hardhat to use EIP-1559 tx format
       maxPriorityFeePerGas: priorityFee,
-      nonce: nonce,
       log: true,
     });
   }
 };
-module.exports.tags = ["ESignature"];
+module.exports.tags = ["DigitalSignature"];
