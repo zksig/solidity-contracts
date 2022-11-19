@@ -139,7 +139,6 @@ contract DigitalSignature {
 
     SignatureConstraint storage constraint;
     bool found = false;
-    uint constraintIndex;
     for (uint i = 0; i < agreement.constraints.length; i++) {
       if (
         keccak256(abi.encodePacked(agreement.constraints[i].identifier)) ==
@@ -147,7 +146,6 @@ contract DigitalSignature {
       ) {
         found = true;
         constraint = agreement.constraints[i];
-        constraintIndex = i;
         require(
           constraint.allowedToUse == 0 ||
             constraint.totalUsed < constraint.allowedToUse,
@@ -178,14 +176,17 @@ contract DigitalSignature {
       encryptedCid: params.encryptedCid,
       signer: tx.origin,
       nftContractAddress: agreement.nftContractAddress,
-      nftTokenId: constraintIndex,
+      nftTokenId: 0,
       timestamp: block.timestamp,
       blockNumber: block.number
     });
 
     if (agreement.nftContractAddress != address(0)) {
       AgreementNFT nftContract = AgreementNFT(agreement.nftContractAddress);
-      nftContract.signatureMint(tx.origin, constraintIndex, params.nftTokenURI);
+      packet.nftTokenId = nftContract.signatureMint(
+        tx.origin,
+        params.nftTokenURI
+      );
     }
 
     packets[tx.origin][profile.totalSignatures] = packet;

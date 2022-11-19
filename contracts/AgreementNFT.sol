@@ -1,6 +1,6 @@
 pragma solidity ^0.8.9;
 
-import "./ERC721NoEvents.sol";
+import "./utils/ERC721NoEvents.sol";
 
 /**
  * @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard, including
@@ -8,13 +8,17 @@ import "./ERC721NoEvents.sol";
  * {ERC721Enumerable}.
  */
 contract AgreementNFT is ERC721NoEvents {
+  address private _owner;
+  uint256 private nextTokenId;
   string private _imageCID;
+  mapping(address => mapping(string => uint256)) private _ownerTokens;
 
   constructor(
     string memory _name,
     string memory _symbol,
     string memory imageCID_
   ) ERC721NoEvents(_name, _symbol) {
+    _owner = tx.origin;
     _imageCID = imageCID_;
   }
 
@@ -24,10 +28,22 @@ contract AgreementNFT is ERC721NoEvents {
 
   function signatureMint(
     address signer,
-    uint256 tokenId,
+    string calldata identifier,
     string calldata tokenURI
-  ) public {
-    _setTokenURI(tokenId, tokenURI);
-    _safeMint(signer, tokenId);
+  ) public returns (uint256) {
+    require(owner == tx.origin, "Only owner can mint NFTs");
+
+    _setTokenURI(nextTokenId, tokenURI);
+    _safeMint(signer, nextTokenId);
+    _ownerTokens[signer][tokenURI] = nextTokenId;
+    return nextTokenId++;
+  }
+
+  function verifyByTokenURI(
+    address signer,
+    string calldata tokenURI
+  ) public returns (bool) {
+    uint256 tokenId = _ownerTokens[signer][tokenURI];
+    return _ownerOf(tokenId) == signer;
   }
 }
