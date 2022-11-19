@@ -7,16 +7,16 @@ import "../AgreementNFT.sol";
 import "./CommonNFTDealClient.sol";
 
 contract AgreementNFTDealClient is CommonNFTDealClient {
-  string public providerTokenURI;
   string public clientTokenURI;
+  string public providerTokenURI;
 
   constructor(
     address _nftAddress,
-    string memory _providerTokenURI,
-    string memory _clientTokenURI
+    string memory _clientTokenURI,
+    string memory _providerTokenURI
   ) CommonNFTDealClient(_nftAddress) {
-    providerTokenURI = _providerTokenURI;
     clientTokenURI = _clientTokenURI;
+    providerTokenURI = _providerTokenURI;
   }
 
   function authorizeData(

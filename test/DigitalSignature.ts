@@ -3,7 +3,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ethers } from "hardhat";
 import { DigitalSignature } from "../typechain-types";
 
-describe("DigitalSignature", function () {
+describe("DigitalSignature", () => {
   let contract: DigitalSignature;
   let owner: SignerWithAddress;
   let otherAccount: SignerWithAddress;
