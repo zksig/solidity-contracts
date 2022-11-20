@@ -2,7 +2,6 @@
 pragma solidity ^0.8.17;
 
 import { bytesToAddress } from "../utils/helpers.sol";
-import { specific_authenticate_message_params_parse, specific_deal_proposal_cbor_parse } from "../utils/CBORParse.sol";
 import "../AgreementNFT.sol";
 import "./CommonNFTDealClient.sol";
 
@@ -24,7 +23,7 @@ contract AgreementNFTDealClient is CommonNFTDealClient {
     bytes calldata client,
     bytes calldata provider,
     uint size
-  ) public virtual override {
+  ) internal virtual override {
     super.authorizeData(cidraw, client, provider, size);
 
     AgreementNFT nftContract = AgreementNFT(nftAddress);
