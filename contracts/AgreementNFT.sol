@@ -19,7 +19,7 @@ contract AgreementNFT is ERC721NoEvents {
     string memory imageCID_
   ) ERC721NoEvents(_name, _symbol) {
     nextTokenId = 1;
-    _owner = tx.origin;
+    _owner = msg.sender;
     _imageCID = imageCID_;
   }
 
@@ -31,9 +31,9 @@ contract AgreementNFT is ERC721NoEvents {
     address signer,
     string calldata tokenURI
   ) public returns (uint256) {
-    require(_owner == tx.origin, "Only owner can mint NFTs");
+    require(_owner == msg.sender, "Only owner can mint NFTs");
 
-    _safeMint(signer, nextTokenId);
+    _mint(signer, nextTokenId);
     _setTokenURI(nextTokenId, tokenURI);
     _ownerTokens[signer][tokenURI] = nextTokenId;
     return nextTokenId++;
