@@ -13,6 +13,7 @@ abstract contract NFTDealClient {
 
   function authorizeData(
     bytes calldata cidraw,
+    bytes calldata client,
     bytes calldata provider,
     uint size
   ) internal virtual;
@@ -36,6 +37,6 @@ abstract contract NFTDealClient {
       bytes calldata provider,
       uint size
     ) = specific_deal_proposal_cbor_parse(deal_proposal_cbor_bytes);
-    authorizeData(cidraw, provider, size);
+    authorizeData(cidraw, client, provider, size);
   }
 }

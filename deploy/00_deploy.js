@@ -12,7 +12,6 @@ async function callRpc(method, params) {
   var options = {
     method: "POST",
     url: "https://wallaby.node.glif.io/rpc/v0",
-    // url: "http://localhost:1234/rpc/v0",
     headers: {
       "Content-Type": "application/json",
     },

@@ -6,11 +6,14 @@ import "./NFTDealClient.sol";
 import "../utils/ERC721NoEvents.sol";
 
 contract ClientNFTDealClient is NFTDealClient {
+  constructor(address nftAddress) NFTDealClient(nftAddress) {}
+
   function authorizeData(
     bytes calldata cidraw,
     bytes calldata client,
+    bytes calldata provider,
     uint size
-  ) internal virtual {
+  ) internal virtual override {
     ERC721NoEvents nftContract = ERC721NoEvents(nftAddress);
 
     require(
