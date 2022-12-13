@@ -2,7 +2,7 @@
 pragma solidity ^0.8.17;
 
 import { bytesToAddress } from "../utils/helpers.sol";
-import "../AgreementNFT.sol";
+import "../nft/AgreementNFT.sol";
 import "./CommonNFTDealClient.sol";
 
 contract AgreementNFTDealClient is CommonNFTDealClient {

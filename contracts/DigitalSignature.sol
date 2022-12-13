@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-import "./AgreementNFT.sol";
+import "./nft/IAgreementNFT.sol";
+import "./nft/AgreementNFTFactory.sol";
 
 struct CreateAgreementParams {
   string identifier;
@@ -68,9 +69,14 @@ struct SignaturePacket {
 }
 
 contract DigitalSignature {
+  address private _nftFactoryAddress;
   mapping(address => Profile) profiles;
   mapping(address => mapping(uint256 => Agreement)) agreements;
   mapping(address => mapping(uint256 => SignaturePacket)) packets;
+
+  constructor(address nftFactoryAddress_) {
+    _nftFactoryAddress = nftFactoryAddress_;
+  }
 
   function getProfile() public view returns (Profile memory) {
     return profiles[tx.origin];
@@ -109,13 +115,14 @@ contract DigitalSignature {
     Agreement storage agreement,
     string memory nftImageCid
   ) internal returns (address) {
-    AgreementNFT nftContract = new AgreementNFT(
+    IAgreementNFTFactory factory = IAgreementNFTFactory(_nftFactoryAddress);
+    address nftContract = factory.deploy(
       agreement.identifier,
       agreement.identifier,
       nftImageCid
     );
-    agreement.nftContractAddress = address(nftContract);
 
+    agreement.nftContractAddress = address(nftContract);
     return agreement.nftContractAddress;
   }
 
@@ -126,7 +133,7 @@ contract DigitalSignature {
     require(agreement.owner == params.agreementOwner, "Invalid agreement");
     require(
       agreement.status == AgreementStatus.PENDING,
-      "Agreement is not PENDING "
+      "Agreement is not PENDING"
     );
 
     SignatureConstraint storage constraint;
@@ -174,7 +181,7 @@ contract DigitalSignature {
     });
 
     if (agreement.nftContractAddress != address(0)) {
-      AgreementNFT nftContract = AgreementNFT(agreement.nftContractAddress);
+      IAgreementNFT nftContract = IAgreementNFT(agreement.nftContractAddress);
       packet.nftTokenId = nftContract.signatureMint(
         tx.origin,
         params.nftTokenURI

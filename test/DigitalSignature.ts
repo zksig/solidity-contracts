@@ -11,11 +11,14 @@ describe("DigitalSignature", () => {
   before(async () => {
     [owner, otherAccount] = await ethers.getSigners();
 
+    const nftFactory = await ethers.getContractFactory("AgreementNFTFactory");
+    const nftFactoryContract = await nftFactory.deploy();
+
     const DigitalSignature = await ethers.getContractFactory(
       "DigitalSignature"
     );
 
-    contract = await DigitalSignature.deploy();
+    contract = await DigitalSignature.deploy(nftFactoryContract.address);
   });
 
   it("creates agreements", async function () {

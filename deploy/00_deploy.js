@@ -32,9 +32,17 @@ module.exports = async ({ deployments, hardhatArguments }) => {
   const { deploy } = deployments;
 
   if (hardhatArguments.network === "sepolia") {
-    await deploy("DigitalSignature", {
+    const contract = await deploy("AgreementNFTFactory", {
       from: deployer.address,
       args: [],
+      log: true,
+    });
+
+    console.log(contract.receipt.contractAddress);
+
+    await deploy("DigitalSignature", {
+      from: deployer.address,
+      args: [contract.receipt.contractAddress],
       log: true,
     });
   } else {
