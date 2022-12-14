@@ -31,31 +31,36 @@ const deployer = new ethers.Wallet(DEPLOYER_PRIVATE_KEY);
 module.exports = async ({ deployments, hardhatArguments }) => {
   const { deploy } = deployments;
 
-  if (hardhatArguments.network === "sepolia") {
-    const contract = await deploy("AgreementNFTFactory", {
-      from: deployer.address,
-      args: [],
-      log: true,
-    });
-
-    console.log(contract.receipt.contractAddress);
-
-    await deploy("DigitalSignature", {
-      from: deployer.address,
-      args: [contract.receipt.contractAddress],
-      log: true,
-    });
-  } else {
+  if (hardhatArguments.network === "wallaby") {
     const priorityFee = await callRpc("eth_maxPriorityFeePerGas");
     const f4Address = fa.newDelegatedEthAddress(deployer.address).toString();
 
     console.log("Wallet Ethereum Address:", deployer.address);
     console.log("Wallet f4Address: ", f4Address);
 
+    await Promise.all([
+      deploy("AgreementNFTFactory", {
+        from: deployer.address,
+        args: [],
+        maxPriorityFeePerGas: priorityFee,
+        log: true,
+      }),
+      deploy("DigitalSignature", {
+        from: deployer.address,
+        args: [],
+        maxPriorityFeePerGas: priorityFee,
+        log: true,
+      }),
+    ]);
+  } else {
+    await deploy("AgreementCallbackNFTFactory", {
+      from: deployer.address,
+      args: [],
+      log: true,
+    });
     await deploy("DigitalSignature", {
       from: deployer.address,
       args: [],
-      maxPriorityFeePerGas: priorityFee,
       log: true,
     });
   }

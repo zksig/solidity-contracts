@@ -17,6 +17,11 @@ const config: HardhatUserConfig = {
       chainId: 11155111,
       accounts: [process.env.PRIVATE_KEY!],
     },
+    mumbai: {
+      url: "https://rpc-mumbai.maticvigil.com",
+      chainId: 80001,
+      accounts: [process.env.PRIVATE_KEY!],
+    },
   },
 };
 

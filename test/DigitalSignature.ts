@@ -1,9 +1,13 @@
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ethers } from "hardhat";
-import { DigitalSignature } from "../typechain-types";
+import {
+  AgreementCallbackNFTFactory,
+  DigitalSignature,
+} from "../typechain-types";
 
 describe("DigitalSignature", () => {
+  let nftFactoryContract: AgreementCallbackNFTFactory;
   let contract: DigitalSignature;
   let owner: SignerWithAddress;
   let otherAccount: SignerWithAddress;
@@ -11,14 +15,16 @@ describe("DigitalSignature", () => {
   before(async () => {
     [owner, otherAccount] = await ethers.getSigners();
 
-    const nftFactory = await ethers.getContractFactory("AgreementNFTFactory");
-    const nftFactoryContract = await nftFactory.deploy();
+    const nftFactory = await ethers.getContractFactory(
+      "AgreementCallbackNFTFactory"
+    );
+    nftFactoryContract = await nftFactory.deploy();
 
     const DigitalSignature = await ethers.getContractFactory(
       "DigitalSignature"
     );
 
-    contract = await DigitalSignature.deploy(nftFactoryContract.address);
+    contract = await DigitalSignature.deploy();
   });
 
   it("creates agreements", async function () {
@@ -27,8 +33,6 @@ describe("DigitalSignature", () => {
       cid: "1234",
       encryptedCid: "4321",
       descriptionCid: "6789",
-      withNFT: false,
-      nftImageCid: "9876",
       constraints: [
         {
           identifier: "tax payer",
@@ -37,20 +41,24 @@ describe("DigitalSignature", () => {
           allowedToUse: 1,
         },
       ],
+      agreementCallback: ethers.constants.AddressZero,
+      signatureCallback: ethers.constants.AddressZero,
+      extraInfo: Buffer.from(""),
     });
     const agreement = {
       ...(await contract.getAgreements(owner.address, 0, 1))[0],
     };
     expect(agreement).to.contain({
       owner: owner.address,
-      status: 0,
+      status: 1,
       identifier: "tax w9",
       cid: "1234",
       encryptedCid: "4321",
       descriptionCid: "6789",
       signedPackets: 0,
       totalPackets: 1,
-      nftContractAddress: ethers.constants.AddressZero,
+      agreementCallback: ethers.constants.AddressZero,
+      signatureCallback: ethers.constants.AddressZero,
     });
   });
 
@@ -60,8 +68,6 @@ describe("DigitalSignature", () => {
       cid: "1234",
       encryptedCid: "4321",
       descriptionCid: "6789",
-      withNFT: true,
-      nftImageCid: "9876",
       constraints: [
         {
           identifier: "tax payer",
@@ -76,13 +82,16 @@ describe("DigitalSignature", () => {
           allowedToUse: 1,
         },
       ],
+      agreementCallback: nftFactoryContract.address,
+      signatureCallback: ethers.constants.AddressZero,
+      extraInfo: Buffer.from("12345"),
     });
     const agreement = {
       ...(await contract.getAgreements(owner.address, 1, 1))[0],
     };
     expect(agreement).to.contain({
       owner: owner.address,
-      status: 0,
+      status: 1,
       identifier: "tax w9",
       cid: "1234",
       encryptedCid: "4321",
@@ -90,7 +99,7 @@ describe("DigitalSignature", () => {
       signedPackets: 0,
       totalPackets: 2,
     });
-    expect(agreement.nftContractAddress).to.not.equal(
+    expect(agreement.signatureCallback).to.not.equal(
       ethers.constants.AddressZero
     );
   });
@@ -101,7 +110,7 @@ describe("DigitalSignature", () => {
       agreementIndex: 0,
       identifier: "tax payer",
       encryptedCid: "6543",
-      nftTokenURI: "67676",
+      extraInfo: Buffer.from("67676"),
     });
 
     const signature = {
@@ -116,19 +125,18 @@ describe("DigitalSignature", () => {
       identifier: "tax payer",
       encryptedCid: "6543",
       signer: owner.address,
-      nftContractAddress: ethers.constants.AddressZero,
     });
 
     expect(agreement).to.contain({
       owner: owner.address,
-      status: 1,
+      status: 2,
       identifier: "tax w9",
       cid: "1234",
       encryptedCid: "4321",
       descriptionCid: "6789",
       signedPackets: 1,
       totalPackets: 1,
-      nftContractAddress: ethers.constants.AddressZero,
+      signatureCallback: ethers.constants.AddressZero,
     });
   });
 
@@ -138,7 +146,7 @@ describe("DigitalSignature", () => {
       agreementIndex: 1,
       identifier: "tax payer",
       encryptedCid: "6543",
-      nftTokenURI: "67676",
+      extraInfo: Buffer.from("67676"),
     });
 
     const signature = {
@@ -154,14 +162,10 @@ describe("DigitalSignature", () => {
       encryptedCid: "6543",
       signer: owner.address,
     });
-    expect(signature.nftContractAddress).to.not.equal(
-      ethers.constants.AddressZero
-    );
-    expect(signature.nftTokenId.toNumber()).to.equal(1);
 
     expect(agreement).to.contain({
       owner: owner.address,
-      status: 0,
+      status: 1,
       identifier: "tax w9",
       cid: "1234",
       encryptedCid: "4321",
@@ -169,6 +173,13 @@ describe("DigitalSignature", () => {
       signedPackets: 1,
       totalPackets: 2,
     });
+
+    const nftContract = (
+      await ethers.getContractFactory("AgreementNFT")
+    ).attach(agreement.signatureCallback);
+
+    expect(await nftContract.verifyByTokenURI(owner.address, "67676")).to.be
+      .true;
   });
 
   it("errors when signing an already signed field", async () => {
@@ -178,7 +189,7 @@ describe("DigitalSignature", () => {
         agreementIndex: 1,
         identifier: "tax payer",
         encryptedCid: "6543",
-        nftTokenURI: "67676",
+        extraInfo: Buffer.from("67676"),
       })
     ).to.rejectedWith("Signature already gathered");
   });
@@ -189,7 +200,7 @@ describe("DigitalSignature", () => {
       agreementIndex: 1,
       identifier: "manager",
       encryptedCid: "6543",
-      nftTokenURI: "67676",
+      extraInfo: Buffer.from("4444"),
     });
 
     const signature = {
@@ -205,14 +216,10 @@ describe("DigitalSignature", () => {
       encryptedCid: "6543",
       signer: owner.address,
     });
-    expect(signature.nftContractAddress).to.not.equal(
-      ethers.constants.AddressZero
-    );
-    expect(signature.nftTokenId.toNumber()).to.equal(2);
 
     expect(agreement).to.contain({
       owner: owner.address,
-      status: 1,
+      status: 2,
       identifier: "tax w9",
       cid: "1234",
       encryptedCid: "4321",
@@ -220,6 +227,13 @@ describe("DigitalSignature", () => {
       signedPackets: 2,
       totalPackets: 2,
     });
+
+    const nftContract = (
+      await ethers.getContractFactory("AgreementNFT")
+    ).attach(agreement.signatureCallback);
+
+    expect(await nftContract.verifyByTokenURI(owner.address, "4444")).to.be
+      .true;
   });
 
   it("errors when signing a complete agreement", async () => {
@@ -229,32 +243,32 @@ describe("DigitalSignature", () => {
         agreementIndex: 1,
         identifier: "manager",
         encryptedCid: "6543",
-        nftTokenURI: "67676",
+        extraInfo: Buffer.from("4444"),
       })
     ).to.rejectedWith("Agreement is not PENDING");
   });
 
   it("verifies true by token URI", async () => {
-    const signature = {
-      ...(await contract.getSignatures(owner.address, 2, 1))[0],
+    const agreement = {
+      ...(await contract.getAgreements(owner.address, 1, 1))[0],
     };
 
     const nftContract = (
       await ethers.getContractFactory("AgreementNFT")
-    ).attach(signature.nftContractAddress);
+    ).attach(agreement.signatureCallback);
 
     expect(await nftContract.verifyByTokenURI(owner.address, "67676")).to.be
       .true;
   });
 
   it("verifies false by token URI", async () => {
-    const signature = {
-      ...(await contract.getSignatures(owner.address, 2, 1))[0],
+    const agreement = {
+      ...(await contract.getAgreements(owner.address, 1, 1))[0],
     };
 
     const nftContract = (
       await ethers.getContractFactory("AgreementNFT")
-    ).attach(signature.nftContractAddress);
+    ).attach(agreement.signatureCallback);
 
     expect(await nftContract.verifyByTokenURI(owner.address, "123123")).to.be
       .false;

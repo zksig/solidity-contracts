@@ -10,7 +10,7 @@ import {
   ProviderNFTDealClient,
 } from "../typechain-types";
 
-describe("Deal Clients", () => {
+describe.skip("Deal Clients", () => {
   let owner: SignerWithAddress;
   let otherAccount: SignerWithAddress;
 
